@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Teacher\TeacherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,8 +15,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware(['auth:sanctum'])->group(function(){
+    Route::get('teacher/{uuid}', [TeacherController::class, 'show']);
+    Route::post('teacher', [TeacherController::class, 'store']);
 });
 
 Route::get('/', function() {

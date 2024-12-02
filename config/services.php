@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'micro_auth' => [
+        'token' => env('MICRO_AUTH_TOKEN'),
+        'url' => env('MICRO_AUTH_URL'),
+    ]
+
 ];
