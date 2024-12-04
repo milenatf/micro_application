@@ -16,8 +16,9 @@ class MicroAuthService
         $this->url = config('services.auth.token');
     }
 
-    public function getUser(string $uuidTeacher)
+    public function authMicroApplication()
     {
+        dd('Micro application ');
         // $response = $this->request('get', "")
     }
 }
