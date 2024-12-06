@@ -16,11 +16,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/auth', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware(['auth:sanctum'])->group(function(){
+Route::middleware(['microAuthAutenticate'])->group(function(){
+    Route::get('me', [AuthController::class, 'me']);
+
+    Route::get('/dash', function() {
+        return response()->json('Acessou o dashboard');
+    });
+
     Route::get('teacher/{uuid}', [TeacherController::class, 'show']);
-    Route::post('teacher', [TeacherController::class, 'store']);
+    // Route::post('teacher', [TeacherController::class, 'store']);
 });
 
 Route::get('/', function() {

@@ -2,6 +2,8 @@
 
 namespace App\Services\MicroAuth;
 
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Milenatf\MicroservicesCommon\Services\Traits\ConsumerExternalService;
 
 class MicroAuthService
@@ -12,13 +14,46 @@ class MicroAuthService
 
     public function __construct()
     {
-        $this->url = config('services.auth.url');
-        $this->url = config('services.auth.token');
+        // $this->url = config('services.micro_auth.url');
+        $this->url = config('services.micro_auth.url');
+        $this->token = config('services.micro_auth.token');
     }
 
-    public function authMicroApplication()
+    public function login($request)
     {
-        dd('Micro application ');
-        // $response = $this->request('get', "")
+        try {
+            return $this->request('post', "/login", [
+                'email' => $request->email,
+                'password' => $request->password,
+                'device_name' => $request->device_name
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erro no login do micro auth:', ['message' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    public function me()
+    {
+        try {
+            return $this->request('get', "/me");
+        } catch (\Exception $e) {
+            Log::error('Erro no me do micro auth:', ['message' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    public function validateToken(string $bearerToken)
+    {
+        $header = ['Authorization' => $bearerToken];
+
+        try {
+
+            return $this->request('get', '/validate-token', [], $header);
+
+        } catch(Exception $e) {
+            Log::error('Erro ao validar o token no micro auth:', ['message' => $e->getMessage()]);
+            throw $e;
+        }
     }
 }

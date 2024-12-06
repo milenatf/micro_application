@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Teacher;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Teacher\StoreTeacherRequest;
 use App\Models\Teacher;
+use App\Services\MicroAuth\MicroAuthService;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -12,14 +13,16 @@ class TeacherController extends Controller
 {
     private $model;
 
-    public function __construct(Teacher $teacher)
-    {
+    public function __construct(
+        Teacher $teacher,
+        private MicroAuthService $microAuthService
+    ) {
         $this->model = $teacher;
     }
 
-    public function show(string $uuid)
+    public function me(Request $request)
     {
-        $teacher = $this->model->where('uuid', $uuid)->first();
+        $teacher = $this->model->where('uuid', $request->user['id'])->first()->makeHidden(['created_at', 'updated_at', 'id', 'uuid']);
 
         if(!$teacher) {
             return response()->json([
@@ -28,7 +31,9 @@ class TeacherController extends Controller
             ], 404);
         }
 
-        return response()->json($teacher->makeHidden(['created_at', 'updated_at']));
+        $authUser = collect($request->user)->merge($teacher);
+
+        return response()->json($authUser);
     }
 
     public function store(StoreTeacherRequest $request)
