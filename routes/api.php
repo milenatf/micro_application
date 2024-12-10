@@ -20,6 +20,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware(['microAuthAutenticate'])->group(function(){
     Route::get('me', [AuthController::class, 'me']);
+    Route::get('logout', [AuthController::class, 'logout']);
 
     Route::get('/dash', function() {
         return response()->json('Acessou o dashboard');

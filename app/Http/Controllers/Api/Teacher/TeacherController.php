@@ -20,22 +20,6 @@ class TeacherController extends Controller
         $this->model = $teacher;
     }
 
-    public function me(Request $request)
-    {
-        $teacher = $this->model->where('uuid', $request->user['id'])->first()->makeHidden(['created_at', 'updated_at', 'id', 'uuid']);
-
-        if(!$teacher) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Registro não encontrado'
-            ], 404);
-        }
-
-        $authUser = collect($request->user)->merge($teacher);
-
-        return response()->json($authUser);
-    }
-
     public function store(StoreTeacherRequest $request)
     {
         try {

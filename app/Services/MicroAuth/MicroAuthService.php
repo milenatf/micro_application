@@ -33,12 +33,16 @@ class MicroAuthService
         }
     }
 
-    public function me()
+    public function logout(string $bearerToken)
     {
+        $header = ['Authorization' => $bearerToken];
+
         try {
-            return $this->request('get', "/me");
-        } catch (\Exception $e) {
-            Log::error('Erro no me do micro auth:', ['message' => $e->getMessage()]);
+
+            return $this->request('get', '/logout', [], $header);
+
+        } catch(Exception $e) {
+            Log::error('Erro realizar o logout:', ['message' => $e->getMessage()]);
             throw $e;
         }
     }

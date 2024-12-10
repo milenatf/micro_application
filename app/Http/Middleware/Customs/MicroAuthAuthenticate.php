@@ -32,13 +32,13 @@ class MicroAuthAuthenticate
             $response = $this->microAuthService->validateToken($bearerToken);
 
             if ($response->failed()) {
-                return response()->json(['error' => 'Unauthorized'], 401);
+                return response()->json(['error' => 'Unauthenticated'], 401);
             }
 
             $user = $response->json()['user'];
 
-            // Armazenar no cache por 10 minutos
-            Cache::put($bearerToken, $user, 600);
+            // Armazenar no cache por 24 horas
+            Cache::put($bearerToken, $user, 86400);
         }
 
         $request->merge(['user' => collect($user)->except(['created_at', 'updated_at'])]);
