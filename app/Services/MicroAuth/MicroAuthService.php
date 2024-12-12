@@ -14,7 +14,6 @@ class MicroAuthService
 
     public function __construct()
     {
-        // $this->url = config('services.micro_auth.url');
         $this->url = config('services.micro_auth.url');
         $this->token = config('services.micro_auth.token');
     }
@@ -46,12 +45,23 @@ class MicroAuthService
     public function login($request)
     {
         try {
-            return $this->request('post', "/login", [
+            $response = $this->request('post', "/login", [
                 'email' => $request->email,
                 'password' => $request->password,
                 'device_name' => $request->device_name
             ]);
-        } catch (\Exception $e) {
+
+            return response()->json(json_decode($response->getBody(), true), $response->getStatusCode());
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            // Captura erros de cliente (422, 404, etc.) do micro auth
+            $response = $e->getResponse();
+
+            return response()->json(
+                json_decode($response->getBody(), true),
+                $response->getStatusCode()
+            );
+        }
+        catch (\Exception $e) {
             Log::error('Erro no login do micro auth:', ['message' => $e->getMessage()]);
             throw $e;
         }

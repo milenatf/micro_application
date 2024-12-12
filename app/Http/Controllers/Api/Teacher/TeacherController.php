@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Teacher\StoreTeacherRequest;
+use App\Http\Requests\Teacher\UpdateTeacherRequest;
 use App\Models\Teacher;
 use App\Services\MicroAuth\MicroAuthService;
 use Exception;
@@ -20,19 +21,6 @@ class TeacherController extends Controller
         $this->model = $teacher;
     }
 
-    // public function store(StoreTeacherRequest $request)
-    // {
-    //     $dataForm = $request->except('user');
-
-    //     try {
-    //         $this->model->create($dataForm);
-
-    //         return response()->json(['status' => 'success', 'message' => 'Professor cadastrado com sucesso.'], 201);
-    //     } catch(Exception $e) {
-    //         return response()->json(['status' => 'failed', 'message' => 'Não foi possível cadastrar o professor.'], 500);
-    //     }
-    // }
-
     public function show(Request $request)
     {
         $teacher = $this->model->where('uuid', $request->user['id'])->first();
@@ -42,7 +30,8 @@ class TeacherController extends Controller
         return response()->json(['data' => $teacher->makeHidden(['created_at', 'updated_at'])]);
     }
 
-    public function update(Request $request)
+
+    public function update(UpdateTeacherRequest $request)
     {
         $teacher = $this->model->where('uuid', $request->user['id'])->first();
 

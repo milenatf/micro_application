@@ -3,18 +3,17 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Student;
 use App\Models\Teacher;
 use App\Services\MicroAuth\MicroAuthService;
 use App\Services\Student\StudentService;
 use App\Services\Teacher\TeacherService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
     public function __construct(
-        private Student $studentModel,
         private Teacher $teacherModel,
         private StudentService $studentService,
         private TeacherService $teacherService,
@@ -23,8 +22,7 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        $model = $request->user['is_teacher'] === 0 ? $this->studentModel : $this->teacherModel;
-        $user = $model->where('uuid', $request->user['id'])->first();
+        $user = $this->teacherModel->where('uuid', $request->user['id'])->first();
 
         if(!$user) {
             return response()->json([
@@ -37,7 +35,6 @@ class AuthController extends Controller
             'uuid' => $user->uuid,
             'name' => $request->user['name'],
             'email' => $request->user['email'],
-            'is_teacher' => $request->user['is_teacher'],
             'email_verified_at' => $request->user['email_verified_at'],
             'expertise' => $user->expertise,
             'experiense' => $user->experiense,
@@ -48,19 +45,20 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $response = $this->microAuthService->login($request);
-
-        if(!data_get($response->json(), 'user')) {
-            return $response->json();
+        try {
+            $response = $this->microAuthService->login($request);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage());
         }
 
-        $role = $response->json()['user']['is_teacher'];
-        $uuid = $response->json()['user']['id'];
+        if($response->getStatusCode() !== 200) {
+            return $response;
+        }
 
-        $service = $role === 0 ? $this->studentService : $this->teacherService;
+        $result = json_decode($response->getContent())->data;
 
-        if(!$service->getByUuid($uuid)) {
-            $newUser = $service->store($uuid);
+        if(!$this->teacherService->getByUuid($result->id)) {
+            $newUser = $this->teacherService->store($result->id);
 
             if(!$newUser) {
                 return response()->json([
@@ -71,7 +69,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'token' => $response->json()['user']['token']
+            'token' => $result->token
         ]);
     }
 

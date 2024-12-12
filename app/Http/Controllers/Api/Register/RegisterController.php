@@ -3,14 +3,11 @@
 namespace App\Http\Controllers\Api\Register;
 
 use App\Http\Controllers\Controller;
-use App\Models\Student;
 use App\Models\Teacher;
 use App\Services\MicroAuth\MicroAuthService;
 use App\Services\Student\StudentService;
 use App\Services\Teacher\TeacherService;
 use Exception;
-use GuzzleHttp\Exception\ClientException;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,7 +15,6 @@ class RegisterController extends Controller
 {
     public function __construct(
         private MicroAuthService $microAuthService,
-        private Student $studentModel,
         private Teacher $teacherModel,
         private StudentService $studentService,
         private TeacherService $teacherService
@@ -39,14 +35,13 @@ class RegisterController extends Controller
 
         if($response->getStatusCode() === 201) {
             $result = json_decode($response->getContent());
-            $service = (bool) $result->is_teacher == false ? $this->studentService : $this->teacherService;
 
-            $user = $service->getByUuid('uuid', $result->id);
+            $user = $this->teacherService->getByUuid('uuid', $result->id);
 
             if(!$user) {
                 try {
 
-                    $service->store($result->id);
+                    $this->teacherService->store($result->id);
 
                     return response()->json(['data' => $result], 200);
 

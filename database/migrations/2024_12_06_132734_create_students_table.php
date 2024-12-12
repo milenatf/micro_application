@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid', 255);
             $table->unsignedBigInteger('teacher_id');
-            $table->string('curso')->nullable();
-            $table->string('turm')->nullable();
+            $table->string('curso', 150)->nullable();
+            $table->string('turma', 150)->nullable();
             $table->timestamps();
 
             $table->foreign('teacher_id')->references('id')->on('teachers')->onDelete('cascade');
