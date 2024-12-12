@@ -37,6 +37,8 @@ class MicroAuthAuthenticate
 
             $user = $response->json()['user'];
 
+            dd($user);
+
             // Armazenar no cache por 24 horas
             Cache::put($bearerToken, $user, 86400);
         }

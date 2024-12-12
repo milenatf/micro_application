@@ -14,20 +14,78 @@ class TeacherController extends Controller
     private $model;
 
     public function __construct(
-        Teacher $teacher,
+        private Teacher $teacher,
         private MicroAuthService $microAuthService
     ) {
         $this->model = $teacher;
     }
 
-    public function store(StoreTeacherRequest $request)
-    {
-        try {
-            $this->model->create($request->all());
+    // public function store(StoreTeacherRequest $request)
+    // {
+    //     $dataForm = $request->except('user');
 
-            return response()->json(['status' => 'success', 'message' => 'Professor cadastrado com sucesso.'], 201);
-        } catch(Exception $e) {
-            return response()->json(['status' => 'failed', 'message' => 'Não foi possível cadastrar o professor.'], 500);
+    //     try {
+    //         $this->model->create($dataForm);
+
+    //         return response()->json(['status' => 'success', 'message' => 'Professor cadastrado com sucesso.'], 201);
+    //     } catch(Exception $e) {
+    //         return response()->json(['status' => 'failed', 'message' => 'Não foi possível cadastrar o professor.'], 500);
+    //     }
+    // }
+
+    public function show(Request $request)
+    {
+        $teacher = $this->model->where('uuid', $request->user['id'])->first();
+
+        if(!$teacher) return response()->json(['status' => 'failed', 'message' => 'Professor não encontrado'], 404);
+
+        return response()->json(['data' => $teacher->makeHidden(['created_at', 'updated_at'])]);
+    }
+
+    public function update(Request $request)
+    {
+        $teacher = $this->model->where('uuid', $request->user['id'])->first();
+
+        if(!$teacher) return response()->json(['status' => 'failed', 'message' => 'Professor não encontrado'], 404);
+
+        $dataForm = $request->except('user');
+        $dataForm['uuid'] = $request->user['id'];
+
+        try {
+            $teacher->update($dataForm);
+
+            return response()->json([
+                'status' => 'success',
+                'Message' => 'Atualização realizada com sucesso.'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Não foi possível atualizar os dados',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        $teacher = $this->model->where('uuid', $request->user['id'])->first();
+
+        if(!$teacher) return response()->json(['status' => 'failed', 'message' => 'Professor não encontrado'], 404);
+
+        try {
+            $teacher->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'Message' => 'Professor excluído com sucesso.'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Não foi possível excluir o professor',
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services\MicroAuth;
 
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Milenatf\MicroservicesCommon\Services\Traits\ConsumerExternalService;
 
@@ -17,6 +18,20 @@ class MicroAuthService
         // $this->url = config('services.micro_auth.url');
         $this->url = config('services.micro_auth.url');
         $this->token = config('services.micro_auth.token');
+    }
+
+    public function register($request)
+    {
+        try {
+            return $this->request('post', '/register', $request);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'error' => true,
+                'message' => 'Erro ao regitrar no micro auth: ' . $e->getMessage(),
+            ]);
+        }
     }
 
     public function login($request)

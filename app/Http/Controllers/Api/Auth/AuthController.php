@@ -7,15 +7,17 @@ use App\Models\Student;
 use App\Models\Teacher;
 use App\Services\MicroAuth\MicroAuthService;
 use App\Services\Student\StudentService;
+use App\Services\Teacher\TeacherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
     public function __construct(
-        private Teacher $teacherModel,
         private Student $studentModel,
+        private Teacher $teacherModel,
         private StudentService $studentService,
+        private TeacherService $teacherService,
         private MicroAuthService $microAuthService
     ) { }
 
@@ -55,7 +57,7 @@ class AuthController extends Controller
         $role = $response->json()['user']['is_teacher'];
         $uuid = $response->json()['user']['id'];
 
-        $service = $role === 0 ? $this->studentService : '$this->teacherModel';
+        $service = $role === 0 ? $this->studentService : $this->teacherService;
 
         if(!$service->getByUuid($uuid)) {
             $newUser = $service->store($uuid);
