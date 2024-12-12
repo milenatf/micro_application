@@ -3,7 +3,6 @@
 namespace App\Services\MicroAuth;
 
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Milenatf\MicroservicesCommon\Services\Traits\ConsumerExternalService;
 
@@ -23,14 +22,24 @@ class MicroAuthService
     public function register($request)
     {
         try {
-            return $this->request('post', '/register', $request);
+            $response =  $this->request('post', '/register', $request);
 
+            return response()->json(json_decode($response->getBody(), true), $response->getStatusCode());
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            // Captura erros de cliente (422, 404, etc.) do micro auth
+            $response = $e->getResponse();
+
+            return response()->json(
+                json_decode($response->getBody(), true),
+                $response->getStatusCode()
+            );
         } catch (Exception $e) {
-
+            // Lida com outros erros
             return response()->json([
                 'error' => true,
-                'message' => 'Erro ao regitrar no micro auth: ' . $e->getMessage(),
-            ]);
+                'message' => 'Erro ao cadastrar usuário no micro auth: ' . $e->getMessage(),
+            ], 500);
         }
     }
 

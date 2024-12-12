@@ -6,7 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Services\MicroAuth\MicroAuthService;
+use App\Services\Student\StudentService;
+use App\Services\Teacher\TeacherService;
 use Exception;
+use GuzzleHttp\Exception\ClientException;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class RegisterController extends Controller
@@ -14,34 +19,45 @@ class RegisterController extends Controller
     public function __construct(
         private MicroAuthService $microAuthService,
         private Student $studentModel,
-        private Teacher $teacherModel
+        private Teacher $teacherModel,
+        private StudentService $studentService,
+        private TeacherService $teacherService
     ) { }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        $response = $this->microAuthService->register($request->all());
+        try {
 
-        if(!data_get($response->json(), 'error')) {
+            $response = $this->microAuthService->register($request->all());
 
-            $model = (bool) $response->json()['user']['is_teacher'] == false ? $this->studentModel : $this->teacherModel;
-            $user = $model->where('uuid', $response->json()['user']['id'])->first();
+        } catch(Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Erro ao processar o registro: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        if($response->getStatusCode() === 201) {
+            $result = json_decode($response->getContent());
+            $service = (bool) $result->is_teacher == false ? $this->studentService : $this->teacherService;
+
+            $user = $service->getByUuid('uuid', $result->id);
 
             if(!$user) {
                 try {
-                    $model->create(['uuid' => $response->json()['user']['id']]);
+
+                    $service->store($result->id);
+
+                    return response()->json(['data' => $result], 200);
 
                 } catch(Exception $e) {
-                    $userType = class_basename($model) === 'Teacher' ? 'professor' : 'aluno';
-
                     return response([
                         'status' => 'failed',
-                        'message' => "Não foi possível adicionar o {$userType}",
+                        'message' => "Não foi possível adicionar o registro.",
                         'error' => $e->getMessage()
                     ]);
                 }
             }
         }
-
-        return $response;
     }
 }
