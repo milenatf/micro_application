@@ -5,25 +5,48 @@ namespace App\Http\Controllers\Api\Teacher;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Teacher\StoreTeacherRequest;
 use App\Http\Requests\Teacher\UpdateTeacherRequest;
+use App\Models\Student;
 use App\Models\Teacher;
 use App\Services\MicroAuth\MicroAuthService;
+use App\Services\Teacher\TeacherService;
 use Exception;
 use Illuminate\Http\Request;
 
 class TeacherController extends Controller
 {
-    private $model;
-
     public function __construct(
-        private Teacher $teacher,
+        private Teacher $model,
+        private TeacherService $service,
+        private Student $student,
         private MicroAuthService $microAuthService
-    ) {
-        $this->model = $teacher;
+    ) { }
+
+    public function store(StoreTeacherRequest $request)
+    {
+        $authUser = auth()->user();
+        $data = $request->all();
+        $data['uuid'] = $authUser->id;
+
+        if(!$this->service->store($data)) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Não foi possível inserir o registro.'
+            ], 500);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Registro inserido com sucesso.'
+        ], 201);
     }
 
-    public function show(Request $request)
+    public function show(string $user_id = null)
     {
-        $teacher = $this->model->where('uuid', $request->user['id'])->first();
+        if( $user_id === null) {
+            $user_id = auth()->user()->id;
+        }
+
+        $teacher = $this->model->where('uuid', $user_id)->first();
 
         if(!$teacher) return response()->json(['status' => 'failed', 'message' => 'Professor não encontrado'], 404);
 
@@ -33,15 +56,14 @@ class TeacherController extends Controller
 
     public function update(UpdateTeacherRequest $request)
     {
-        $teacher = $this->model->where('uuid', $request->user['id'])->first();
+        $user_id = auth()->user()->id;
+
+        $teacher = $this->model->where('uuid', $user_id)->first();
 
         if(!$teacher) return response()->json(['status' => 'failed', 'message' => 'Professor não encontrado'], 404);
 
-        $dataForm = $request->except('user');
-        $dataForm['uuid'] = $request->user['id'];
-
         try {
-            $teacher->update($dataForm);
+            $teacher->update($request->all());
 
             return response()->json([
                 'status' => 'success',
@@ -56,9 +78,10 @@ class TeacherController extends Controller
         }
     }
 
-    public function delete(Request $request)
+    public function delete()
     {
-        $teacher = $this->model->where('uuid', $request->user['id'])->first();
+        $user_id = auth()->user()->id;
+        $teacher = $this->model->where('uuid', $user_id)->first();
 
         if(!$teacher) return response()->json(['status' => 'failed', 'message' => 'Professor não encontrado'], 404);
 

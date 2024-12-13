@@ -20,27 +20,29 @@ class AuthController extends Controller
         private MicroAuthService $microAuthService
     ) { }
 
-    public function me(Request $request)
+    public function me()
     {
-        $user = $this->teacherModel->where('uuid', $request->user['id'])->first();
+        // dd(auth()->user()->id);
+        $authUser = auth()->user();
+        $teacher = $this->teacherModel->where('uuid', $authUser->id)->first();
 
-        if(!$user) {
+        if(!$teacher) {
             return response()->json([
                 'status' => 'failed',
                 'message' => 'Registro não encontrado'
             ], 404);
         }
 
-        $authUser = [
-            'uuid' => $user->uuid,
-            'name' => $request->user['name'],
-            'email' => $request->user['email'],
-            'email_verified_at' => $request->user['email_verified_at'],
-            'expertise' => $user->expertise,
-            'experiense' => $user->experiense,
+        $me = [
+            'uuid' => $authUser->id,
+            'name' => $authUser->name,
+            'email' => $authUser->email,
+            'email_verified_at' => $authUser->email_verified_at,
+            'expertise' => $teacher->expertise,
+            'experiense' => $teacher->experiense,
         ];
 
-        return response()->json($authUser);
+        return response()->json($me);
     }
 
     public function login(Request $request)

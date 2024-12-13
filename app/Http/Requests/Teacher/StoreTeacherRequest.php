@@ -22,7 +22,6 @@ class StoreTeacherRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'uuid' => 'required|max:255',
             'expertise' => 'nullable|min:3|max:500',
             'experience' => 'nullable|min:3|max:1000'
         ];

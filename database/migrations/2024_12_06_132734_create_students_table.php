@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('students', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('uuid', 255);
+            $table->uuid('id')->primary();
             $table->unsignedBigInteger('teacher_id');
             $table->string('curso', 150)->nullable();
             $table->string('turma', 150)->nullable();

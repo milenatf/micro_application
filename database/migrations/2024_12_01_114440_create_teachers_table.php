@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('teachers', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid', 255);
+            $table->uuid('uuid', 255)->unique();
             $table->string('expertise', 150)->nullable();
             $table->string('experiense', 150)->nullable();
             $table->timestamps();

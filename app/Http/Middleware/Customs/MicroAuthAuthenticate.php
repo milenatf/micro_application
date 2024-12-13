@@ -2,12 +2,12 @@
 
 namespace App\Http\Middleware\Customs;
 
+use App\Models\AuthenticatedUser;
 use App\Services\MicroAuth\MicroAuthService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class MicroAuthAuthenticate
@@ -41,7 +41,9 @@ class MicroAuthAuthenticate
             Cache::put($bearerToken, $user, 86400);
         }
 
-        $request->merge(['user' => collect($user)->except(['created_at', 'updated_at'])]);
+        Auth::setUser(new AuthenticatedUser($user));
+
+        // $request->merge(['user' => collect($user)->except(['created_at', 'updated_at'])]);
 
         return $next($request);
     }

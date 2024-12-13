@@ -21,14 +21,16 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [RegisterController::class, 'store']);
 
-Route::middleware(['microAuthAutenticate'])->group(function(){
+Route::middleware(['microAuthAutenticate'])->group(function() {
     // Student's routes
+    Route::get('students', [StudentController::class, 'index']);
     Route::post('students', [StudentController::class, 'store']);
 
     // Teacher's routes
-    Route::get('teachers', [TeacherController::class, 'show']);
+    Route::post('teachers', [TeacherController::class, 'store']);
     Route::put('teachers', [TeacherController::class, 'update']);
     Route::delete('teachers', [TeacherController::class, 'delete']);
+    Route::get('teachers/{user_id?}', [TeacherController::class, 'show']);
 
     // Auth routes
     Route::get('me', [AuthController::class, 'me']);

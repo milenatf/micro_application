@@ -22,13 +22,15 @@ class StudentRepository
         return response()->json($student);
     }
 
-    public function store(string $uuid): bool|JsonResponse
+    public function store(array $data): bool|JsonResponse
     {
+        dd($data);
         try {
-            $this->model->create(['uuid' => $uuid]);
-            return true;
+            $this->model->create($data);
+            // return true;
         } catch(Exception $e) {
-            return false;
+            // return false;
+            return $e->getMessage();
         }
     }
 }
