@@ -22,6 +22,21 @@ class TeacherRepository
         return response()->json($teacher);
     }
 
+    public function register(string $uuid): bool
+    {
+        try {
+
+            $this->model->create(['uuid' => $uuid]);
+
+            return true;
+
+        } catch(Exception $e) {
+
+            return false;
+
+        }
+    }
+
     public function store(array $data): bool
     {
         try {

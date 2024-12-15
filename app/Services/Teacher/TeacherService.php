@@ -16,6 +16,11 @@ class TeacherService
         return $this->repository->getByUuid($uuid);
     }
 
+    public function register(string $uuid)
+    {
+        return $this->repository->register($uuid);
+    }
+
     public function store(array $data)
     {
         return $this->repository->store($data);

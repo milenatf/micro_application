@@ -34,14 +34,16 @@ class RegisterController extends Controller
         }
 
         if($response->getStatusCode() === 201) {
+
             $result = json_decode($response->getContent());
+            // return $result;
 
             $user = $this->teacherService->getByUuid('uuid', $result->id);
 
             if(!$user) {
                 try {
 
-                    $this->teacherService->store($result->id);
+                    $this->teacherService->register($result->id);
 
                     return response()->json(['data' => $result], 200);
 
